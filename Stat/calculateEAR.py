@@ -4,11 +4,13 @@ import csv
 import os
 
 # อ่านข้อมูลจากไฟล์ CSV For Read
-file_path = 'C:/Project/End/Code/ear_data.csv'
-file_path_almond = 'C:/Project/End/Code/Data/almond/ear_data_almond4.csv'
+path = 'ear_data_almond.csv'
+file_path_round = 'C:/Project/End/Code/Data/round/ear_data_round.csv'
+file_path_almond = 'C:/Project/End/Code/Data/almond/with_glass/ear_data_almond_with_glass.csv'
 data = pd.read_csv(file_path_almond)
 
 range_close_eyes = 0.45
+range_type_eyes = 0.11
 
 #PATH File CSV for Write
 csv_file_name = "ear_data_for_train_almond.csv"
@@ -59,8 +61,8 @@ def write_EAR_to_file(data):
 
 
 #Check Close And Open Eyes
-def check_close_eyes(left,right,median_left,median_right,delta,range_close_eyes):
-    if left < median_left - delta*range_close_eyes and right < median_right - delta*range_close_eyes :
+def check_close_eyes(left,right,median_left,median_right,delta_left,delta_right,range_close_eyes):
+    if left < median_left - delta_left*range_close_eyes and right < median_right - delta_right*range_close_eyes :
             print(f"{left} : {right} : Close Eyes\n")
             return "Close"
     else : 
@@ -69,22 +71,26 @@ def check_close_eyes(left,right,median_left,median_right,delta,range_close_eyes)
 
 
 #Check Type of eyes
-def check_eyes(max_left,max_right,delta,range_close_eyes,median_left,median_right,data_left,data_right):
-    id = find_last_person_id()
-    type_of_eyes = "Almond" if max_left < 0.25 and max_right < 0.25 else "Round"
-    print(f"{median_left:.3f}")
-    print(f"{median_right:.3f}")
-    print(f"{median_left-delta*range_close_eyes:.3f}")
-    print(f"{median_right-delta*range_close_eyes:.3f}\n")
+def check_eyes(max_left,max_right,delta_left,delta_right,range_close_eyes,median_left,median_right,data_left,data_right):
+    # id = find_last_person_id()
+
+    type_of_eyes = "Almond" if delta_left < range_type_eyes and delta_right < range_type_eyes else "Round"
+    
+    # print(f"{type_of_eyes}")
+
+    # print(f"{median_left:.3f}")
+    # print(f"{median_right:.3f}")
+    # print(f"{median_left-delta_left*range_close_eyes:.3f}")
+    # print(f"{median_right-delta_right*range_close_eyes:.3f}\n")
     
     count_close = 0
     count_open = 0
     
     for left,right in zip(data_left,data_right) :
-        result = check_close_eyes(left,right,median_left,median_right,delta,range_close_eyes)
+        result = check_close_eyes(left,right,median_left,median_right,delta_left,delta_right,range_close_eyes)
         if result == "Close" : count_close += 1
         else : count_open += 1
-        write_EAR_to_file([id,type_of_eyes,left,right,result])
+        # write_EAR_to_file([id,type_of_eyes,left,right,result])
     print(f"Count Close : {count_close}\nCount Open : {count_open}\n")
 
 
@@ -162,4 +168,4 @@ print(f"\n==================================\nDelta left {range_close_eyes} : \n
 
 # find_last_person_id()
 
-# check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,range_close_eyes,median_left,median_right,unique_left_np,unique_right_np)
+check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,delta_ear_right,range_close_eyes,median_left,median_right,unique_left_np,unique_right_np)

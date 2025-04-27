@@ -12,7 +12,7 @@ import pandas as pd
 mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 
-csv_file_name = "ear_data_almond.csv"
+csv_file_name = "ear_data_round3.csv"
 
 #Find Last ID
 def find_last_person_id():

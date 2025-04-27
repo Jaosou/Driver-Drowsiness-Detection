@@ -4,9 +4,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
+def data_print(x_test,y_test, y_pred):
+    if y_test != y_pred:
+        print(f"X Test : {x_test}\nY Test : {y_test}\nY Pred : {y_pred}\n")
+
 # โหลดข้อมูลจาก CSV
-data = pd.read_csv('ear_data_for_train1.csv')
-data_test = pd.read_csv('ear_data_for_train1.csv')
+data = pd.read_csv('C:/Project/End/Code/Data/train/round/all_data_round.csv')
+data_test = pd.read_csv('C:/Project/End/Code/Data/train/round/ear_data_for_train_round3.csv')
 
 # แปลงค่า 'mode_eyes' เป็น 0 (Open) และ 1 (Closed)
 label_encoder = LabelEncoder()
@@ -40,6 +44,8 @@ model.fit(X_train, y_train)
 
 # ทำนายผลลัพธ์
 y_pred = model.predict(x_test_data_input)
+
+list(map(data_print, x_test_data_input,y_test_data, y_pred))
 
 # ประเมินผล
 accuracy = accuracy_score(y_test_data, y_pred)
