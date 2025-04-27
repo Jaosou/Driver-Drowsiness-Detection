@@ -5,13 +5,13 @@ import os
 
 # อ่านข้อมูลจากไฟล์ CSV For Read
 file_path = 'C:/Project/End/Code/ear_data.csv'
-file_path_almond = 'C:/Project/End/Code/Data/almond/ear_data_almond4.csv'
-data = pd.read_csv(file_path_almond)
+data = pd.read_csv(file_path)
 
 range_close_eyes = 0.45
 
+
 #PATH File CSV for Write
-csv_file_name = "ear_data_for_train_almond.csv"
+csv_file_name = "ear_data_for_train1.csv"
 # Check if the CSV file exists
 file_exists = os.path.exists(csv_file_name)
 
@@ -160,6 +160,6 @@ print(f"\n==================================\nDelta left : \n{delta_ear_left:.3f
 
 print(f"\n==================================\nDelta left {range_close_eyes} : \n{(delta_ear_left*range_close_eyes):.3f}\nDelta right {range_close_eyes} : \n{(delta_ear_right*range_close_eyes):.3f}\n==================================")
 
-# find_last_person_id()
+find_last_person_id()
 
-# check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,range_close_eyes,median_left,median_right,unique_left_np,unique_right_np)
+check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,range_close_eyes,median_left,median_right,ear_value_left,ear_value_right)

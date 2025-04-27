@@ -12,10 +12,11 @@ import pandas as pd
 mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 
+csv_file_name = "ear_data_almond.csv"
+
 #Find Last ID
 def find_last_person_id():
-    file_path = 'ear_data.csv'
-    data = pd.read_csv(file_path)
+    data = pd.read_csv(csv_file_name)
 
     # ดึง person_id จากแถวสุดท้าย
     last_person_id = data['person_id'].iloc[-1] 
@@ -41,7 +42,7 @@ cap = cv2.VideoCapture(0)
 plotY = LivePlot(640, 360, [0, 5], invert=True)  # Left
 plotYRigth = LivePlot(640, 360, [0, 5], invert=True)  # Right
 
-csv_file_name = "ear_data.csv"
+
 status = ""
 left_ear = 0
 right_ear = 0
