@@ -103,6 +103,8 @@ ear_value_right = pd.to_numeric(data['ear_value_right'], errors='coerce')
 ear_value_left = ear_value_left.dropna()
 ear_value_right = ear_value_right.dropna()
 
+print(ear_value_left)
+
 # หรือใช้ unique() เพื่อดึงค่าที่ไม่ซ้ำ
 unique_left_np = pd.to_numeric(ear_value_left.unique(), errors='coerce')
 unique_right_np = pd.to_numeric(ear_value_right.unique(), errors='coerce')
@@ -145,25 +147,25 @@ median_right = calculate_median(weighted_avg_top_right,weighted_avg_smallest_rig
 delta_ear_left = weighted_avg_top_left - median_left
 delta_ear_right = weighted_avg_top_right - median_right
 
-# แสดงผลลัพธ์
-print(f"\n==================================\nMax left : \n{top_3_left}\nMax right : \n{top_3_right}\n==================================")
+# # แสดงผลลัพธ์
+# print(f"\n==================================\nMax left : \n{top_3_left}\nMax right : \n{top_3_right}\n==================================")
 
-print(f"\n==================================\nMin left : \n{min_3_left}\nMin right : \n{min_3_right}\n==================================")
+# print(f"\n==================================\nMin left : \n{min_3_left}\nMin right : \n{min_3_right}\n==================================")
 
-print(f"\n==================================\nWeight Max left : \n{weights_top_left}\nWeight Max right : \n{weights_top_right}\n==================================")
+# print(f"\n==================================\nWeight Max left : \n{weights_top_left}\nWeight Max right : \n{weights_top_right}\n==================================")
 
-print(f"\n==================================\nWeight Min left : \n{weights_smallest_left}\nWeight Min right : \n{weights_smallest_right}\n==================================")
+# print(f"\n==================================\nWeight Min left : \n{weights_smallest_left}\nWeight Min right : \n{weights_smallest_right}\n==================================")
 
-print(f"\n==================================\nAvg Max left : \n{weighted_avg_top_left:.3f}\nAvg Max right : \n{weighted_avg_top_right:.3f}\n==================================")
+# print(f"\n==================================\nAvg Max left : \n{weighted_avg_top_left:.3f}\nAvg Max right : \n{weighted_avg_top_right:.3f}\n==================================")
 
-print(f"\n==================================\nAvg Min left : \n{weighted_avg_smallest_left:.3f}\nAvg Min right : \n{weighted_avg_smallest_right:.3f}\n==================================")
+# print(f"\n==================================\nAvg Min left : \n{weighted_avg_smallest_left:.3f}\nAvg Min right : \n{weighted_avg_smallest_right:.3f}\n==================================")
 
-print(f"\n==================================\nMedian left : \n{median_left:.3f}\nMedian right : \n{median_right:.3f}\n==================================")
+# print(f"\n==================================\nMedian left : \n{median_left:.3f}\nMedian right : \n{median_right:.3f}\n==================================")
 
-print(f"\n==================================\nDelta left : \n{delta_ear_left:.3f}\nDelta right : \n{delta_ear_right:.3f}\n==================================")
+# print(f"\n==================================\nDelta left : \n{delta_ear_left:.3f}\nDelta right : \n{delta_ear_right:.3f}\n==================================")
 
-print(f"\n==================================\nDelta left {range_close_eyes} : \n{(delta_ear_left*range_close_eyes):.3f}\nDelta right {range_close_eyes} : \n{(delta_ear_right*range_close_eyes):.3f}\n==================================")
+# print(f"\n==================================\nDelta left {range_close_eyes} : \n{(delta_ear_left*range_close_eyes):.3f}\nDelta right {range_close_eyes} : \n{(delta_ear_right*range_close_eyes):.3f}\n==================================")
 
-find_last_person_id()
+# find_last_person_id()
 
-check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,delta_ear_right,range_close_eyes,median_left,median_right,ear_value_left,ear_value_right)
+# check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,delta_ear_right,range_close_eyes,median_left,median_right,ear_value_left,ear_value_right)

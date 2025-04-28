@@ -1,124 +1,137 @@
-import cv2 as cv2 #todo : Eye detection
-import cvzone
-from cvzone.FaceMeshModule import FaceMeshDetector 
+import joblib
+import numpy as np
+import pandas as pd
+import cv2
+import mediapipe as mp
 from cvzone.PlotModule import LivePlot
-
-videio_path = "assets/video2.mp4"
-
-#* Web Cam Video
-cap = cv2.VideoCapture(videio_path)
-detector = FaceMeshDetector(maxFaces=2) #todo : 1 person
-
-#* Plot Graph and Fix window
-plotY = LivePlot(640,360,[25,40],invert=True) #Left
-plotYRigth = LivePlot(640,360,[25,40],invert=True) #Rigth
-plotMouth = LivePlot(640,360,[25,40],invert=True) #Mouth
+import math
+import time
+import csv
+import os
+import sys
+sys.path.append('Stat/type_of_eyes')
+import delta
 
 
-#* Point landmark
-left_eye = [33, 160, 158, 133, 153, 144]
-rigth_eye = [362, 385, 387, 263, 373, 380]
-idListRigth = [22,23,24,26,110,157,158,159,160,161,130] 
-idListRigthRigth = [362,381,380,374,373,390,263,388,386,384, 385,387]
-idMouth = [61,62,185,40,39,37,0,267,269,270,300]
+path_file = "ear_data_for_cal_median_ta1.csv"
+file_exists = os.path.exists(path_file)
 
-listRatioRigth = []
-listRatioRigthRigth = []
-blinkCount = 0
-counter = 0
+type_eyes = ""
+left_ear = 0
+right_ear = 0
 
-#* Main
-while cap.isOpened() :
-    ret, frame = cap.read()
-    frame ,face = detector.findFaceMesh(frame,draw=False)
 
-    if face :
-        face = face[0]
-        #* Mark point on Face
-        for id in left_eye:
-            cv2.circle(frame,face[id],4,(255,0,255),cv2.FILLED)
+
+with open(path_file, "a", newline="") as csvfile:
+    fieldnames = ['ear_value_left','ear_value_right']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    
+    if not file_exists:
+        writer.writeheader()
+        
+
+def write_to_csv(datas) :
+    with open(path_file, "a", newline="") as csvfile:
+        fieldnames = ['ear_value_left','ear_value_right']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        print(file_exists)
+        
+        for data in datas :    
+            writer.writerow({
+                'ear_value_left': f"{data[0]}",
+                'ear_value_right': f"{data[1]}",
+            })
+
+def read_csv_file():
+    if file_exists :
+        data = pd.read_csv(path_file)
+    return data
+
+def validate_type_of_eyes():
+    data = read_csv_file()
+    ear_value_left = pd.to_numeric(data['ear_value_left'], errors='coerce')
+    ear_value_right = pd.to_numeric(data['ear_value_right'], errors='coerce')
+    delta_ear_left,delta_ear_right = delta.cal_delta(ear_value_left,ear_value_right)
+    type_of_eyes = delta.validate_type_eyes(delta_ear_left,delta_ear_right)
+    return type_of_eyes
+
+
+def calculate_ear(eye):
+    A = math.dist(eye[1], eye[5])  # Vertical distance between two points
+    B = math.dist(eye[2], eye[4])  # Vertical distance between two points
+    C = math.dist(eye[0], eye[3])  # Horizontal distance between two points
+    ear = (abs(A) + abs(B)) / (2.0 * abs(C))
+    return ear
+
+# Initialize Mediapipe FaceMesh
+mp_face_mesh = mp.solutions.face_mesh
+mp_drawing = mp.solutions.drawing_utils
+
+
+# โหลดโมเดลที่บันทึกไว้ C:/Project/End/Code/ear_data.csv
+model_round = joblib.load('C:/Project/End/Code/Test/round/model_round2.pkl')
+model_almond = joblib.load('C:/Project/End/Code/Test/almond/model_almond2.pkl')
+
+# เปิดกล้อง
+file_path_almond = 'C:/Project/End/Code/assets/Almond/video1.mp4'
+cap = cv2.VideoCapture(0)
+
+with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
+    
+        check_type_of_eyes = []
+    
+        while cap.isOpened():
+            ret, frame = cap.read()
             
-        for id in rigth_eye:
-            cv2.circle(frame,face[id],4,(255,0,255),cv2.FILLED)
+            #Close Video
+            if not ret:
+                break
 
+            # Convert the image to RGB
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-    #* Left Eye
-    try :
-        leftUp = face[159]
-        leftDown = face[23]
-        leftleft = face[130]
-        leftRight = face[243]
-    except IndexError:
-        continue
+            # Process the image and find landmarks
+            results = face_mesh.process(image)
 
-    #* Rigth Eye
-    try :
-        rigthUp = face[386]
-        rigthDown = face[374]
-        rigthleft = face[362]
-        rigthRight = face[263]
-    except:
-        continue
+            # Convert back to BGR for OpenCV
+            frame = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    #*Horizon length Left
-    lengthHor,_ = detector.findDistance(leftUp, leftDown)
-    """ cv2.line(frame,leftUp,leftDown, (0,200,0),2) """
-    #* Vertical Length Left
-    lengthVer,_ = detector.findDistance(leftleft,leftRight)
-    """ cv2.line(frame,leftleft,leftRight, (0,200,0),2) """
+            if results.multi_face_landmarks:
+                for face_landmarks in results.multi_face_landmarks:
+                    # Define the landmarks for the left and right eyes
+                    left_eye = [(face_landmarks.landmark[i].x, face_landmarks.landmark[i].y) for i in [33, 160, 158, 133, 153, 144]] #33, 160, 158, 133, 153, 144 || 159,163,161,145,157,154
+                    right_eye = [(face_landmarks.landmark[i].x, face_landmarks.landmark[i].y) for i in [362, 385, 387, 263, 373, 380]]
+                    
+                    # Calculate EAR for both eyes
+                    left_ear = calculate_ear(left_eye)
+                    right_ear = calculate_ear(right_eye)
+                    
+            check_type_of_eyes.append([f"{left_ear:.3f}", f"{right_ear:.3f}"])
+            
+            if len(check_type_of_eyes) == 502:
+                write_to_csv(check_type_of_eyes)
+                type_eyes = validate_type_of_eyes()
+                time.sleep(2)
+                print(type_eyes)
+                break
+            
+            
+            
+            # #Use Model    
+            # prediction = model_round.predict([[left_ear, right_ear]])
 
-    #* Process Left eye
-    ratio = int((lengthHor/lengthVer)*100)
-    listRatioRigth.append(ratio)
-    if len(listRatioRigth)>= 5 : listRatioRigth.pop(0)
-    ratioAvg = sum(listRatioRigth)/len(listRatioRigth)
+            # # แสดงผลการทำนาย
+            # if prediction == 0:
+            #     cv2.putText(frame, "Eyes Open", (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # else:
+            #     cv2.putText(frame, "Eyes Closed", (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-    #*Horizon length Rigth
-    lengthHorRigth,_ = detector.findDistance(rigthUp, rigthDown)
-    """ cv2.line(frame,leftUp,leftDown, (0,200,0),2) """
-    #* Vertical Length Left
-    lengthVerRigth,_ = detector.findDistance(rigthleft,rigthRight)
-    """ cv2.line(frame,leftleft,leftRight, (0,200,0),2) """
+            # แสดงภาพ
+            cv2.imshow('Driver Drowsiness Detection', frame)
 
-    #* Process Rigth eye
-    ratioRigth = int((lengthHorRigth/lengthVerRigth)*100)
-    listRatioRigthRigth.append(ratioRigth)
-    if len(listRatioRigthRigth)>= 5 : listRatioRigthRigth.pop(0)
-    ratioAvgRigth = sum(listRatioRigthRigth)/len(listRatioRigthRigth)
-
-    #* Blink Count
-    if ratioAvg < 32 and ratioAvgRigth < 32 and counter == 0: 
-        blinkCount+=1
-        counter = 1
-    if counter != 0:
-        counter +=1 
-        if counter > 25:
-            counter = 0
-
-    #* PUT Text
-    cvzone.putTextRect(frame,f"Bilnk Count : {blinkCount}",(100,100))
-
-
-    #Todo : Plot Left
-    imgPlot = plotY.update(ratioAvg)
-    frame = cv2.resize(frame,(700,540))
-    imgStack = cvzone.stackImages([frame,imgPlot],1,1)
-    cv2.imshow("StackIm",imgStack)
-
-    #Todo : Plot Rigth
-    imgPlotRigth = plotYRigth.update(ratioAvgRigth)
-    frame = cv2.resize(frame,(700,540))
-    imgStackRigth = cvzone.stackImages([frame,imgPlotRigth],1,1)
-    cv2.imshow("StaclImRigth",imgStackRigth)
-
-    """ cv2.imshow('Eye Detewction', frame) """
-    """ frame = cv2.resize(frame,(1080,720)) """
-    """ cv2.imshow("Frame",frame) """
-
-
-    # ออกจากลูปเมื่อกด 'q'
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        break
+            # ออกจากลูปเมื่อกด 'q'
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
 cap.release()
 cv2.destroyAllWindows()

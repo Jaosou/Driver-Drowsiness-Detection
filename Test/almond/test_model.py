@@ -18,7 +18,7 @@ mp_drawing = mp.solutions.drawing_utils
 
 
 # โหลดโมเดลที่บันทึกไว้ C:/Project/End/Code/ear_data.csv
-model = joblib.load('C:/Project/End/Code/Test/round/model_round2.pkl')
+model = joblib.load('C:/Project/End/Code/Test/almond/model_almond2.pkl')
 
 # เปิดกล้อง
 file_path_almond = 'C:/Project/End/Code/assets/Almond/video1.mp4'
@@ -52,6 +52,8 @@ with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence
                     right_ear = calculate_ear(right_eye)
                     
             prediction = model.predict([[left_ear, right_ear]])
+            
+            print(f"{left_ear} {right_ear} {prediction}\n")
 
             # แสดงผลการทำนาย
             if prediction == 0:

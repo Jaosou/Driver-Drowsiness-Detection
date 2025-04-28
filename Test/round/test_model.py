@@ -52,6 +52,8 @@ with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence
                     right_ear = calculate_ear(right_eye)
                     
             prediction = model.predict([[left_ear, right_ear]])
+            
+            print(f"{left_ear} {right_ear} {prediction}\n")
 
             # แสดงผลการทำนาย
             if prediction == 0:

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 
-file_path = 'C:/Project/End/Code/Data/round/ear_data_round2.csv'
+file_path = 'ear_data_arm.csv'
 data = pd.read_csv(file_path)
 
 range_ratio = 0.45

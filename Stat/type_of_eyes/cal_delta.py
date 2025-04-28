@@ -4,16 +4,16 @@ import csv
 import os
 
 # อ่านข้อมูลจากไฟล์ CSV For Read
-path = 'ear_data_arm.csv'
+path = 'ear_data_almond.csv'
 file_path_round = 'C:/Project/End/Code/Data/round/ear_data_round.csv'
 file_path_almond = 'C:/Project/End/Code/Data/almond/with_glass/ear_data_almond_with_glass.csv'
-data = pd.read_csv(path)
+data = pd.read_csv(file_path_almond)
 
 range_close_eyes = 0.45
 range_type_eyes = 0.11
 
 #PATH File CSV for Write
-csv_file_name = "ear_data_for_train_almond.csv"
+csv_file_name = "data_type_of_eyes.csv"
 # Check if the CSV file exists
 file_exists = os.path.exists(csv_file_name)
 
@@ -24,28 +24,10 @@ with open(csv_file_name, "a", newline="") as csvfile:
     if not file_exists:
         writer.writeheader()
 
-
-#Todo : Get ID
-def get_all_id():
-    unique_person_id = pd.to_numeric(data['person_id'].unique(), errors='coerce')
-    return unique_person_id
-
-
-# Find Last ID
-def find_last_person_id():
-    file_path = 'ear_data.csv'
-    data = pd.read_csv(file_path)
-
-    # ดึง person_id จากแถวสุดท้าย
-    last_person_id = data['person_id'].iloc[-1] 
-
-    print(f"Last person_id: {last_person_id}")
-    return last_person_id
-
     #Write the data into a CSV file [id,type_of_eyes,left,right,result]
 def write_EAR_to_file(data):
     with open(csv_file_name, "a", newline="") as csvfile:
-        fieldnames = ['person_id', 'eye_type', 'ear_value_left','ear_value_right','mode_eyes']
+        fieldnames = ['person_id', 'eye_type', 'ear_value_left','ear_value_right','mode_eyes','delta_left','delta_right']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         print(file_exists)
         
@@ -55,7 +37,9 @@ def write_EAR_to_file(data):
             'eye_type': data[1],
             'ear_value_left': f"{data[2]:.3f}",
             'ear_value_right': f"{data[3]:.3f}",
-            'mode_eyes' : f"{data[4]}"
+            'mode_eyes' : f"{data[4]}",
+            'delta_left' : f"{data[5]:.3f}",
+            'delta_right' : f"{data[6]:.3f}",
         })
         print(data)
 
@@ -72,16 +56,9 @@ def check_close_eyes(left,right,median_left,median_right,delta_left,delta_right,
 
 #Check Type of eyes
 def check_eyes(max_left,max_right,delta_left,delta_right,range_close_eyes,median_left,median_right,data_left,data_right):
-    # id = find_last_person_id()
+    id = 1
 
     type_of_eyes = "Almond" if delta_left < range_type_eyes and delta_right < range_type_eyes else "Round"
-    
-    # print(f"{type_of_eyes}")
-
-    # print(f"{median_left:.3f}")
-    # print(f"{median_right:.3f}")
-    # print(f"{median_left-delta_left*range_close_eyes:.3f}")
-    # print(f"{median_right-delta_right*range_close_eyes:.3f}\n")
     
     count_close = 0
     count_open = 0
@@ -90,14 +67,17 @@ def check_eyes(max_left,max_right,delta_left,delta_right,range_close_eyes,median
         result = check_close_eyes(left,right,median_left,median_right,delta_left,delta_right,range_close_eyes)
         if result == "Close" : count_close += 1
         else : count_open += 1
-        # write_EAR_to_file([id,type_of_eyes,left,right,result])
+        write_EAR_to_file([id,type_of_eyes,left,right,result,delta_left,delta_right])
     print(f"Count Close : {count_close}\nCount Open : {count_open}\n")
 
 
 def calculate_median(max,min):
     return (max + min)/2
 
-# แปลงข้อมูลใน ear_value_left และ ear_value_right เป็นตัวเลข และกรองค่าที่ไม่สามารถแปลงได้
+ear_value_left = []
+ear_value_right = []
+
+#แปลงข้อมูลใน ear_value_left และ ear_value_right เป็นตัวเลข และกรองค่าที่ไม่สามารถแปลงได้
 ear_value_left = pd.to_numeric(data['ear_value_left'], errors='coerce')
 ear_value_right = pd.to_numeric(data['ear_value_right'], errors='coerce')
 
@@ -105,7 +85,7 @@ ear_value_right = pd.to_numeric(data['ear_value_right'], errors='coerce')
 ear_value_left = ear_value_left.dropna()
 ear_value_right = ear_value_right.dropna()
 
-# หรือใช้ unique() เพื่อดึงค่าที่ไม่ซ้ำ
+# # หรือใช้ unique() เพื่อดึงค่าที่ไม่ซ้ำ
 unique_left_np = pd.to_numeric(ear_value_left.unique(), errors='coerce')
 unique_right_np = pd.to_numeric(ear_value_right.unique(), errors='coerce')
 
@@ -147,25 +127,6 @@ median_right = calculate_median(weighted_avg_top_right,weighted_avg_smallest_rig
 delta_ear_left = weighted_avg_top_left - median_left
 delta_ear_right = weighted_avg_top_right - median_right
 
-# แสดงผลลัพธ์
-print(f"\n==================================\nMax left : \n{top_3_left}\nMax right : \n{top_3_right}\n==================================")
-
-print(f"\n==================================\nMin left : \n{min_3_left}\nMin right : \n{min_3_right}\n==================================")
-
-print(f"\n==================================\nWeight Max left : \n{weights_top_left}\nWeight Max right : \n{weights_top_right}\n==================================")
-
-print(f"\n==================================\nWeight Min left : \n{weights_smallest_left}\nWeight Min right : \n{weights_smallest_right}\n==================================")
-
-print(f"\n==================================\nAvg Max left : \n{weighted_avg_top_left:.3f}\nAvg Max right : \n{weighted_avg_top_right:.3f}\n==================================")
-
-print(f"\n==================================\nAvg Min left : \n{weighted_avg_smallest_left:.3f}\nAvg Min right : \n{weighted_avg_smallest_right:.3f}\n==================================")
-
-print(f"\n==================================\nMedian left : \n{median_left:.3f}\nMedian right : \n{median_right:.3f}\n==================================")
-
 print(f"\n==================================\nDelta left : \n{delta_ear_left:.3f}\nDelta right : \n{delta_ear_right:.3f}\n==================================")
 
-print(f"\n==================================\nDelta left {range_close_eyes} : \n{(delta_ear_left*range_close_eyes):.3f}\nDelta right {range_close_eyes} : \n{(delta_ear_right*range_close_eyes):.3f}\n==================================")
-
-# find_last_person_id()
-
-# check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,delta_ear_right,range_close_eyes,median_left,median_right,unique_left_np,unique_right_np)
+check_eyes(weighted_avg_top_left,weighted_avg_top_right,delta_ear_left,delta_ear_right,range_close_eyes,median_left,median_right,unique_left_np,unique_right_np)
