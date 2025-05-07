@@ -57,3 +57,7 @@ print("Confusion Matrix:")
 print(confusion_matrix(y_test_data, y_pred))
 print("Classification Report:")
 print(classification_report(y_test_data, y_pred))
+
+# บันทึกโมเดล
+import joblib
+joblib.dump(model, 'svm_model.joblib')  

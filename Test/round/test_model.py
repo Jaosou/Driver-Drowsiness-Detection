@@ -4,6 +4,7 @@ import cv2
 import mediapipe as mp
 from cvzone.PlotModule import LivePlot
 import math
+import tensorflow as tf
 
 def calculate_ear(eye):
     A = math.dist(eye[1], eye[5])  # Vertical distance between two points
@@ -19,10 +20,15 @@ mp_drawing = mp.solutions.drawing_utils
 
 # โหลดโมเดลที่บันทึกไว้ C:/Project/End/Code/ear_data.csv
 model = joblib.load('C:/Project/End/Code/Test/round/model_round2.pkl')
+ten_model = tf.keras.models.load_model('C:/Project/End/Code/Test/round/round_model.h5')
+svm_model = joblib.load('C:/Project/End/Code/Test/round/svm_model.joblib')
 
 # เปิดกล้อง
 file_path_almond = 'C:/Project/End/Code/assets/Almond/video1.mp4'
 cap = cv2.VideoCapture(0)
+
+left_ear = 0 ;
+right_ear = 0 ;
 
 with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
         while cap.isOpened():
@@ -50,8 +56,10 @@ with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence
                     # Calculate EAR for both eyes
                     left_ear = calculate_ear(left_eye)
                     right_ear = calculate_ear(right_eye)
-                    
-            prediction = model.predict([[left_ear, right_ear]])
+            
+            # new_data = np.array([[left_ear, right_ear]])
+            # new_data = new_data.reshape(-1, 1, 2, 1)
+            prediction = svm_model.predict([[left_ear,right_ear]])
             
             print(f"{left_ear} {right_ear} {prediction}\n")
 
