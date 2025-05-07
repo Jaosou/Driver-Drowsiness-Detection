@@ -57,9 +57,11 @@ with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence
                     left_ear = calculate_ear(left_eye)
                     right_ear = calculate_ear(right_eye)
             
-            # new_data = np.array([[left_ear, right_ear]])
-            # new_data = new_data.reshape(-1, 1, 2, 1)
-            prediction = svm_model.predict([[left_ear,right_ear]])
+            new_data = np.array([left_ear, right_ear])
+            print(new_data)
+            new_data = new_data.reshape(-1, 1, 2, 1)
+            print(new_data)
+            prediction = ten_model.predict([[left_ear, right_ear]])
             
             print(f"{left_ear} {right_ear} {prediction}\n")
 
